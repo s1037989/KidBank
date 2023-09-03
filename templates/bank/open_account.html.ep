@@ -1,0 +1,22 @@
+% layout 'default';
+% title 'Open an Account';
+%= form_for create_account => (method => 'POST') => begin
+<p>
+%= label_for username => 'Name'
+%= text_field 'name'
+</p>
+<p>
+%= label_for username => 'Username'
+%= text_field 'username'
+</p>
+<p>
+%= label_for password => 'Password'
+%= password_field 'password'
+</p>
+<p>
+%= label_for password => 'Re-type Password'
+%= password_field 'password2'
+</p>
+%= submit_button
+% end
+

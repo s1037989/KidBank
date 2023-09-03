@@ -1,0 +1,15 @@
+% layout 'default';
+% title 'Login';
+%= form_for login => (method => 'POST') => begin
+<p>
+%= label_for username => 'Username'
+%= text_field 'username'
+</p>
+<p>
+%= label_for password => 'Password'
+%= password_field 'password'
+</p>
+%= submit_button
+% end
+<p>Or, <%= link_to 'Open an Account' => 'open_account' %></p>
+
