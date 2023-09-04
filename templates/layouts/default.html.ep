@@ -9,6 +9,8 @@
     <style>
       label.field-with-error { color: #dd7e5e }
       input.field-with-error { background-color: #fd9e7e }
+      input[type="submit"], button[type="submit"] { background-color: #c434f9; }
+      input[type="submit"]:hover, button[type="submit"]:hover { background-color: #4d0866; }
     </style>
   </head>
   <body>
