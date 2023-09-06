@@ -54,7 +54,7 @@
   <th>To/From</th>
   <th>Memo</th>
   <th>Amount</th>
-  <th>Balance</th>
+  %#<th>Balance</th>
   <th>&nbsp;</th>
 </tr>
 % my $balance = 0;
@@ -65,7 +65,7 @@
     <td><%= $_->{tx_with} %></td>
     <td><%= $_->{memo} %></td>
     <td><%= currency $_->{pennies} / 100 %></td>
-    <td><%= currency $balance / 100 %></td>
+    %#<td><%= currency $balance / 100 %></td>
     <td><%= button_to '🗑' => 'remove_tx' => {id => $_->{id}} %></td>
   </tr>
 % });
