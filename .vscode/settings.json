@@ -1,0 +1,21 @@
+{
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.rulers": [120],
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 120,
+    "[markdown]": {
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 120
+    },
+    "perl.perlInc": [
+      "/home/stefan/repos/kid_bank/lib",
+      "/home/stefan/repos/kid_bank/local/lib/perl5",
+      "/home/stefan/perl5/perlbrew/perls/perl-5.38.0/lib/site_perl/5.38.0/x86_64-linux",
+      "/home/stefan/perl5/perlbrew/perls/perl-5.38.0/lib/site_perl/5.38.0",
+      "/home/stefan/perl5/perlbrew/perls/perl-5.38.0/lib/5.38.0/x86_64-linux",
+      "/home/stefan/perl5/perlbrew/perls/perl-5.38.0/lib/5.38.0"
+    ],
+    "perl.perlCmd": "/home/stefan/perl5/perlbrew/perls/perl-5.38.0/bin/perl"
+}
