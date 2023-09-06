@@ -36,3 +36,5 @@ inc/
 
 *.conf
 *.db*
+.vscode/perl-lang
+/local

@@ -8,7 +8,7 @@ sub balance ($self) {
     ->map(sub{{date => $self->now($_->{date})->ymd, amount => $_->{pennies} / 100}})
     ->reduce(sub{$a->{$b->{date}} += $b->{amount}; $a}, {});
   my $_balance = 0;
-  $balance = c(map { {date => $_, amount => $_balance += $balance->{$_}} } keys %$balance);
+  $balance = c(map { {date => $_, amount => $_balance += $balance->{$_}} } sort keys %$balance);
   $self->respond_to(
     any => {inline => '<pre><%= dumper $balance %></pre>', balance => $balance},
     json => {json => $balance},
@@ -21,9 +21,13 @@ sub remove_tx ($self) {
   $self->flash(message => 'deleted!')->redirect_to('welcome');
 }
 
+sub welcome ($self) {
+  $self->render(items_per_page => 3);
+}
+
 sub write_tx ($self) {
   my $v = $self->validation;
-  return $self->render('welcome') unless $v->has_data;
+  return $self->render(action => 'welcome') unless $v->has_data;
 
   # Validate parameters ("pass_again" depends on "pass")
   $v->required('date');
@@ -32,7 +36,7 @@ sub write_tx ($self) {
   $v->required('memo');
 
   # Check if validation failed
-  return $self->flash(error => Mojo::JSON::j([map { $v->error($_) } @{$v->failed}]))->render('welcome') if $v->has_error;
+  return $self->flash(error => Mojo::JSON::j([map { $v->error($_) } @{$v->failed}]))->render(action => 'welcome') if $v->has_error;
 
   $v->output->{date} = Time::Piece->strptime($v->param('date'), '%Y-%m-%d')->epoch;
   $v->output->{pennies} = $v->param('pennies') * 100;

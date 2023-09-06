@@ -15,6 +15,11 @@ sub startup ($self) {
   my $sql = Mojo::SQLite->new('sqlite:kid_bank.db');
   $sql->migrations->name('bank')->from_file('migrations/kid_bank.sql')->migrate;
   
+  $self->plugin('Pager');
+
+  $self->helper(pager_text => sub ($c, $page=undef) {
+    sub { $page->{prev} ? 'Prev' : $page->{next} ? 'Next' : $page->{n} };
+  });
   $self->helper(db => sub ($c) { state $db = $sql->db });
   $self->helper(now => sub ($c, $date=undef) { $date ? localtime($date) : localtime });
   $self->helper(currency => sub ($c, $value) { _usd($value) });
@@ -22,11 +27,17 @@ sub startup ($self) {
     my $balance = $c->db->select('transactions', [\'sum(pennies)'], {username => $c->session('username')})->array->[0];
     return $balance ? $balance / 100 : 0;
   });
-  $self->helper(tx_log => sub ($c) { $c->db->select('transactions', undef, {username => $c->session('username')}, {order_by => 'date'})->hashes });
+  $self->helper(tx_log => sub ($c, $items_per_page=undef) {
+    my $page = $c->param('page') || 1;
+    my $items = $c->db->select('transactions', undef, {username => $c->session('username')}, {order_by => 'date'})->hashes;
+    my $total_items = $items->size;
+    $items = $c->db->select('transactions', undef, {username => $c->session('username')}, {order_by => 'date', limit => $items_per_page, offset => ($page-1) * $items_per_page})->hashes if $page && $items_per_page;
+    $c->stash(total_items => $total_items);
+    return $items;
+  });
 
   $self->validator->add_check(money => sub ($v, $name, $value) {
-    $value =~ s/[^\d\.]//g;
-    return !($value =~ /^\d+(\.\d{2})?$/);
+    return !($value =~ /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?$/);
   });
 
   # Router

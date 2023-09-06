@@ -1,9 +1,30 @@
 % layout 'default';
-% title 'Welcome';
-<h1>Hi, <%= session 'name' %>!</h1>
-<p><%= link_to Logout => 'logout' %></p>
-<h1>Balance</h1>
-<p><%= currency balance %></p>
+% my $username = session 'name';
+% title "Kid Bank | $username";
+
+% my $pager = begin
+% my $total_items = stash 'total_items';
+<ul class="pager">
+  % my @pages = pages_for;
+  <li><%= pager_link {n => 1}, sub { 'First' } %></li>
+  % for my $page (@pages) {
+    <li><%= pager_link $page, pager_text($page) %></li>
+  % }
+  % my $last_page = int($total_items / $items_per_page) + ($total_items % $items_per_page);
+  <li><%= pager_link {n => $last_page}, sub { 'Last' } %></li>
+</ul>
+% end
+
+<div class="welcome_container">
+    <div class="block">
+        <h1>Hi, <%= $username %>!</h1>
+        <p><%= link_to Logout => 'logout' %></p>
+    </div>
+    <div class="block">
+        <h1>Balance</h1>
+        <p><%= currency balance %></p>
+    </div>
+</div>
 <h1>Record Transaction</h1>
 %= form_for write_tx => begin
 <table>
@@ -18,15 +39,16 @@
   <td><%= date_field 'date' => now->ymd %></td>
   <td><%= text_field 'tx_with' %></td>
   <td><%= text_field 'memo' %></td>
-  <td><%= number_field 'pennies', step => '0.01' %></td>
+  <td><%= number_field 'pennies', step => '0.01' %><br /><%= label_for pennies => 'Use negative to spend' %></td>
   <td><%= submit_button %></td>
 </tr>
 </table>
 % end
 <hr />
-% my $tx_log = tx_log;
+% my $tx_log = tx_log($items_per_page);
 % if ($tx_log->size) {
-<table>
+<p><%= $pager->() %></p>
+<table class="striped-table">
 <tr>
   <th>Date</th>
   <th>To/From</th>
@@ -38,7 +60,6 @@
 % my $balance = 0;
 % $tx_log->each(sub {
   % $balance += $_->{pennies};
-  % warn $balance;
   <tr>
     <td><%= now($_->{date})->ymd %></td>
     <td><%= $_->{tx_with} %></td>
@@ -49,6 +70,7 @@
   </tr>
 % });
 </table>
+<p><%= $pager->() %></p>
 <div style="width: 80%; margin: auto;">
     <canvas id="myLineChart"></canvas>
 </div>

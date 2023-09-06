@@ -7,10 +7,45 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css-1.6.0.min.css"/>
     <style>
+      h1, form { margin: 0px; }
+      ul { text-align: center; }
+      ul.pager li { display: inline; }
+      ul.pager li a.active { font-weight: bold; background-color: orange; }
+      /* Style for the container holding the two blocks */
+      .welcome_container {
+          display: flex; /* Use flexbox for horizontal alignment */
+      }
+
+      /* Style for each block */
+      .block {
+          flex: 1; /* Allow each block to grow and take equal space */
+          /* padding: 20px; /* Add padding for spacing */
+          border: 0px solid #ccc; /* Add a border for separation */
+          margin-right: 10px; /* Add margin to separate the blocks */
+      }
+
+      /* Remove margin from the last block to prevent extra spacing */
+      .block:last-child {
+          margin-right: 0;
+      }
       label.field-with-error { color: #dd7e5e }
       input.field-with-error { background-color: #fd9e7e }
       input[type="submit"], button[type="submit"] { background-color: #c434f9; }
       input[type="submit"]:hover, button[type="submit"]:hover { background-color: #4d0866; }
+
+      .striped-table tr:nth-child(even) {
+        background-color: #D8BFD8; /* Even rows */
+        margin: 0px;
+      }
+
+      .striped-table tr:nth-child(odd) {
+        background-color: #fff; /* Odd rows */
+        margin: 0px;
+      }
+
+      .striped-table {
+        margin: 0px;
+      }
     </style>
   </head>
   <body>
