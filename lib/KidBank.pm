@@ -15,7 +15,7 @@ sub startup ($self) {
   my $sql = Mojo::SQLite->new('sqlite:kid_bank.db');
   $sql->migrations->name('bank')->from_file('migrations/kid_bank.sql')->migrate;
   
-  $self->plugin('Pager');
+  $self->plugin('Pager' => {always_show_prev_next => 1});
 
   $self->helper(pager_text => sub ($c, $page=undef) {
     sub { $page->{prev} ? 'Prev' : $page->{next} ? 'Next' : $page->{n} };
@@ -27,13 +27,12 @@ sub startup ($self) {
     my $balance = $c->db->select('transactions', [\'sum(pennies)'], {username => $c->session('username')})->array->[0];
     return $balance ? $balance / 100 : 0;
   });
-  $self->helper(tx_log => sub ($c, $items_per_page=undef) {
-    my $page = $c->param('page') || 1;
+  $self->helper(tx_log => sub ($c, $page=undef, $items_per_page=undef) {
+    $page = $page || $c->param('page') || 1;
     my $items = $c->db->select('transactions', undef, {username => $c->session('username')}, {order_by => 'date'})->hashes;
     my $total_items = $items->size;
     $items = $c->db->select('transactions', undef, {username => $c->session('username')}, {order_by => 'date', limit => $items_per_page, offset => ($page-1) * $items_per_page})->hashes if $page && $items_per_page;
-    $c->stash(total_items => $total_items);
-    return $items;
+    return ($total_items, $items);
   });
 
   $self->validator->add_check(money => sub ($v, $name, $value) {
@@ -50,6 +49,7 @@ sub startup ($self) {
 
   my $auth = $r->under('/')->to('bank#auth');
   $auth->get('/')->to('teller#welcome')->name('welcome');
+  $auth->websocket('/tx')->to('teller#transactions')->name('tx_log');
   $auth->get('/balance' => [format => ['html', 'json']] => {format => 'html'})->to('teller#balance');
   $auth->delete('/tx/:id')->to('teller#remove_tx')->name('remove_tx');
   $auth->post('/tx')->to('teller#write_tx')->name('write_tx');

@@ -46,6 +46,9 @@
       .striped-table {
         margin: 0px;
       }
+      .striped-table td {
+        width: 25%;
+      }
     </style>
   </head>
   <body>

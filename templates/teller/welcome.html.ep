@@ -45,10 +45,8 @@
 </table>
 % end
 <hr />
-% my $tx_log = tx_log($items_per_page);
-% if ($tx_log->size) {
-<p><%= $pager->() %></p>
-<table class="striped-table">
+<table id="data-table" class="striped-table">
+<thead>
 <tr>
   <th>Date</th>
   <th>To/From</th>
@@ -57,25 +55,73 @@
   %#<th>Balance</th>
   <th>&nbsp;</th>
 </tr>
-% my $balance = 0;
-% $tx_log->each(sub {
-  % $balance += $_->{pennies};
-  <tr>
-    <td><%= now($_->{date})->ymd %></td>
-    <td><%= $_->{tx_with} %></td>
-    <td><%= $_->{memo} %></td>
-    <td><%= currency $_->{pennies} / 100 %></td>
-    %#<td><%= currency $balance / 100 %></td>
-    <td><%= button_to '🗑' => 'remove_tx' => {id => $_->{id}} %></td>
-  </tr>
-% });
+</thead>
+<tbody>
+</tbody>
 </table>
-<p><%= $pager->() %></p>
+<div id="pagination">
+    <button id="prev-button">Previous</button>
+    <button id="next-button">Next</button>
+</div>
 <div style="width: 80%; margin: auto;">
     <canvas id="myLineChart"></canvas>
 </div>
-
 <script>
+let socket;
+const serverUrl = '<%= url_for("tx_log")->to_abs %>';
+let reconnectInterval = 1000; // Initial reconnect interval in milliseconds
+const maxReconnectInterval = 30000; // Maximum reconnect interval in milliseconds
+let reconnectTimeout;
+function connectWebSocket() {
+  socket = new WebSocket(serverUrl);
+
+  socket.addEventListener('open', (event) => {
+    console.log('WebSocket connection opened.');
+    // You can perform any necessary actions when the connection is established.
+    // For example, subscribe to channels or send initial data.
+    // WebSocket is open; you can request initial data here if needed
+    socket.send(JSON.stringify({page: 1}));
+  });
+
+  socket.addEventListener('message', (event) => {
+    //console.log('Message received:', event.data);
+    // Handle incoming WebSocket messages here.
+    const data = JSON.parse(event.data);
+    currentPage = data.page;
+    console.log(currentPage);
+    document.querySelector('table#data-table tbody').innerHTML = '';
+    document.querySelector('table#data-table tbody').innerHTML = data.html;
+
+    // Enable/disable pagination buttons based on current page and data size
+    prevButton.disabled = data.page === 1;
+    nextButton.disabled = data.page >= data.pages;
+  });
+
+  socket.addEventListener('close', (event) => {
+    console.log('WebSocket connection closed.');
+
+    // Clear any existing reconnect timeout
+    clearTimeout(reconnectTimeout);
+
+    // Implement a reconnect strategy with an increasing interval
+    reconnectInterval = Math.min(reconnectInterval * 2, maxReconnectInterval);
+
+    // Set a timeout to reconnect after the specified interval
+    reconnectTimeout = setTimeout(() => {
+      console.log('Reconnecting to WebSocket...');
+      connectWebSocket(); // Attempt to reconnect
+    }, reconnectInterval);
+  });
+
+  socket.addEventListener('error', (event) => {
+    console.error('WebSocket error:', event);
+
+    // Handle WebSocket errors here, if necessary.
+  });
+}
+
+connectWebSocket();
+
     // Function to fetch data from the API endpoint
     async function fetchData() {
         try {
@@ -148,8 +194,22 @@
         const myLineChart = new Chart(ctx, config);
     }
 
+    // Pagination buttons
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    let currentPage = 1;
+
+    prevButton.addEventListener('click', () => {
+        socket.send(JSON.stringify({page: currentPage - 1}));
+        updateChart();
+    });
+
+    nextButton.addEventListener('click', () => {
+        socket.send(JSON.stringify({page: currentPage + 1}));
+        updateChart();
+    });
+
     // Call the updateChart function to fetch and display data
     updateChart();
 </script>
-% }
 

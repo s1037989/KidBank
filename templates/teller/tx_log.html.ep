@@ -1,0 +1,12 @@
+% my $balance = 0;
+% $tx_log->each(sub {
+  % $balance += $_->{pennies};
+  <tr>
+    <td><%= now($_->{date})->ymd %></td>
+    <td><%= $_->{tx_with} %></td>
+    <td><%= $_->{memo} %></td>
+    <td><%= currency $_->{pennies} / 100 %></td>
+    %#<td><%= currency $balance / 100 %></td>
+    <td><%= button_to '🗑' => 'remove_tx' => {id => $_->{id}} %></td>
+  </tr>
+% });
