@@ -7,12 +7,15 @@ use Time::Piece;
 
 # This method will run once at server start
 sub startup ($self) {
+  my $app = $self->app;
+
+  $self->plugin('Start');
   my $config = $self->plugin('Config');
   $self->sessions->default_expiration(86400 * 7);
   $self->secrets($config->{secrets} || [$self->moniker]);
 
   # Select the library version
-  my $sql = Mojo::SQLite->new('sqlite:kid_bank.db');
+  my $sql = Mojo::SQLite->new(sprintf 'sqlite:%s', $app->paths->data->child(join '.', $app->moniker, $app->mode, 'db'));
   $sql->migrations->name('bank')->from_file('migrations/kid_bank.sql')->migrate;
   
   $self->plugin('Pager' => {always_show_prev_next => 1});

@@ -36,5 +36,9 @@ inc/
 
 *.conf
 *.db*
-.vscode/perl-lang
+.vscode
 /local
+/perlbrew
+/log
+*.pid
+/old
