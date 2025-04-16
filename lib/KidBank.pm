@@ -9,13 +9,13 @@ use Time::Piece;
 sub startup ($self) {
   my $app = $self->app;
 
-  $self->plugin('Start');
   my $config = $self->plugin('Config');
+  $self->plugin('Start');
   $self->sessions->default_expiration(86400 * 7);
   $self->secrets($config->{secrets} || [$self->moniker]);
 
   # Select the library version
-  my $sql = Mojo::SQLite->new(sprintf 'sqlite:%s', $app->paths->data->child(join '.', $app->moniker, $app->mode, 'db'));
+  my $sql = Mojo::SQLite->new(sprintf 'sqlite:%s', $app->home->child(join '.', $app->moniker, $app->mode, 'db'));
   $sql->migrations->name('bank')->from_file('migrations/kid_bank.sql')->migrate;
   
   $self->plugin('Pager' => {always_show_prev_next => 1});
@@ -39,7 +39,7 @@ sub startup ($self) {
   });
 
   $self->validator->add_check(money => sub ($v, $name, $value) {
-    return !($value =~ /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?$/);
+    return !($value =~ /^[+-]?[0-9]{0,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?$/);
   });
 
   # Router
